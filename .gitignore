@@ -1,0 +1,23 @@
+
+# Maven build files
+target/
+
+# Java compiled files
+*.class
+
+# VS Code settings
+.vscode/
+
+# IntelliJ IDEA settings
+.idea/
+
+# Log files
+*.log
+
+# Environment variables and secrets
+.env
+.env.*
+
+# Windows and macOS files
+Thumbs.db
+.DS_Store
