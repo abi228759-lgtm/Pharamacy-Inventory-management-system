@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Pharmacy</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<main class="container">
+    <h1>Dashboard</h1>
+
+    <div th:if="${!#lists.isEmpty(expiredList)}" class="alert bad">
+        &#9888; <strong th:text="${#lists.size(expiredList)}"></strong> medicine(s) have EXPIRED. Remove them from stock.
+    </div>
+    <div th:if="${!#lists.isEmpty(expiringList)}" class="alert soon">
+        &#9200; <strong th:text="${#lists.size(expiringList)}"></strong> medicine(s) will expire within 30 days.
+    </div>
+
+    <div class="cards">
+        <div class="card"><span class="num" th:text="${total}">0</span><span>Total medicines</span></div>
+        <div class="card danger"><span class="num" th:text="${#lists.size(expiredList)}">0</span><span>Expired</span></div>
+        <div class="card soon"><span class="num" th:text="${#lists.size(expiringList)}">0</span><span>Expiring in 30 days</span></div>
+        <div class="card warn"><span class="num" th:text="${#lists.size(lowList)}">0</span><span>Low stock</span></div>
+        <div class="card"><span class="num" th:text="'&#8377;' + ${#numbers.formatDecimal(stockValue, 1, 'COMMA', 2, 'POINT')}">0</span><span>Stock value</span></div>
+        <div class="card"><span class="num" th:text="'&#8377;' + ${todayRevenue}">0</span><span th:text="|Today's revenue (${todayInvoices} bills)|">Today</span></div>
+    </div>
+
+    <div th:replace="~{fragments :: alertTable(${expiredList}, 'Expired medicines', 'row-expired')}"></div>
+    <div th:replace="~{fragments :: alertTable(${expiringList}, 'Expiring soon', 'row-expiring')}"></div>
+    <div th:replace="~{fragments :: alertTable(${lowList}, 'Low stock - reorder needed', 'row-low')}"></div>
+
+    <a th:href="@{/medicines}" class="btn">Manage medicines</a>
+</main>
+<div th:replace="~{fragments :: chatbot}"></div>
+</body>
+</html>

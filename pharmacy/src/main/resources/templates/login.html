@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Login</title>
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body>
+<div class="login-page">
+    <div class="login-wrapper">
+        <div class="login-info">
+            <div class="logo">+</div>
+            <h1>Pharmacy Management</h1>
+            <p>Manage medicine stock, expiry dates and staff in one secure place.</p>
+            <ul class="feature-list">
+                <li>&#10003; Medicine inventory</li>
+                <li>&#10003; Low stock and expiry alerts</li>
+                <li>&#10003; Role-based access</li>
+            </ul>
+        </div>
+        <div class="login-form">
+            <h2>Welcome back</h2>
+            <p class="subtitle">Sign in to continue</p>
+
+            <div th:if="${param.error}" class="message error-message">Invalid email or password.</div>
+            <div th:if="${param.logout}" class="message logout-message">You have been logged out.</div>
+
+            <!-- th:action adds the CSRF token automatically; without it login returns 403 -->
+            <form th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label for="username">Email</label>
+                    <input id="username" type="email" name="username" placeholder="you@pharmacy.com" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" name="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="login-button">Sign In</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Pharmacy</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<main class="container">
+    <h1>User Management</h1>
+    <div th:if="${success}" class="alert ok" th:text="${success}"></div>
+    <div th:if="${error}" class="alert bad" th:text="${error}"></div>
+
+    <section class="panel">
+        <h2>Add user</h2>
+        <form th:action="@{/users/create}" method="post" class="grid">
+            <div class="field"><label>Full name</label><input type="text" name="fullName" required></div>
+            <div class="field"><label>Email</label><input type="email" name="email" required></div>
+            <div class="field"><label>Password (min 8)</label><input type="password" name="password" minlength="8" required></div>
+            <div class="field"><label>Role</label>
+                <select name="role"><option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option></select></div>
+            <div class="field actions"><button type="submit" class="btn">Create user</button></div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>All users</h2>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+            <tr th:each="u : ${users}">
+                <td th:text="${u.fullName}"></td>
+                <td th:text="${u.email}"></td>
+                <td th:text="${u.role}"></td>
+                <td><span th:class="${u.active} ? 'badge ok' : 'badge danger'" th:text="${u.active} ? 'Active' : 'Disabled'"></span></td>
+                <td><form th:action="@{/users/toggle/{id}(id=${u.id})}" method="post">
+                    <button type="submit" class="btn btn-sm btn-light" th:text="${u.active} ? 'Deactivate' : 'Activate'"></button></form></td>
+            </tr>
+            </tbody>
+        </table></div>
+    </section>
+</main>
+<div th:replace="~{fragments :: chatbot}"></div>
+</body>
+</html>

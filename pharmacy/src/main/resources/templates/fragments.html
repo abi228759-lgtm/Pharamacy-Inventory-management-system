@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar" class="navbar">
+    <span class="brand">+ Pharmacy</span>
+    <div class="nav-links">
+        <a th:href="@{/}">Dashboard</a>
+        <a th:href="@{/medicines}">Medicines</a>
+        <a th:href="@{/billing}">Billing</a>
+        <a th:href="@{/sales}">Quick sale</a>
+        <a th:href="@{/suppliers}">Suppliers</a>
+        <a th:href="@{/feedback}">Feedback</a>
+        <a th:if="${isAdmin}" th:href="@{/users}">Users</a>
+    </div>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit" class="btn btn-light">Logout</button>
+    </form>
+</nav>
+
+<section th:fragment="alertTable(list, title, cls)" class="panel" th:if="${!#lists.isEmpty(list)}">
+    <h2 th:text="${title}">Title</h2>
+    <div class="table-wrap">
+    <table>
+        <thead><tr><th>Name</th><th>Batch</th><th>Qty</th><th>Expiry</th><th>Days left</th></tr></thead>
+        <tbody>
+        <tr th:each="m : ${list}" th:class="${cls}">
+            <td th:text="${m.name}"></td>
+            <td th:text="${m.batchNumber}"></td>
+            <td th:text="${m.quantity}"></td>
+            <td th:text="${m.expiryDate}"></td>
+            <td th:text="${m.daysToExpiry < 0} ? ('Expired ' + ${-m.daysToExpiry} + ' days ago') : (${m.daysToExpiry} + ' days')"></td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+</section>
+
+<div th:fragment="chatbot" class="chat">
+    <button type="button" id="chatToggle" class="chat-toggle" title="Pharmacy assistant">&#128172;</button>
+    <div id="chatBox" class="chat-box" hidden>
+        <div class="chat-head">Pharmacy Assistant</div>
+        <div id="chatLog" class="chat-log"><div class="msg bot">Hi! Ask me about stock, prices, expiry or sales. Type "help" for ideas.</div></div>
+        <form id="chatForm" class="chat-form">
+            <input id="chatInput" type="text" placeholder="Type a question..." autocomplete="off">
+            <button type="submit" class="btn btn-sm">Send</button>
+        </form>
+    </div>
+    <input type="hidden" id="csrfToken" th:value="${_csrf.token}">
+    <input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}">
+    <script>
+    (function () {
+        var box = document.getElementById('chatBox'), log = document.getElementById('chatLog'), inp = document.getElementById('chatInput');
+        document.getElementById('chatToggle').onclick = function () { box.hidden = !box.hidden; if (!box.hidden) inp.focus(); };
+        function add(text, cls) {
+            var d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text;
+            log.appendChild(d); log.scrollTop = log.scrollHeight;
+        }
+        document.getElementById('chatForm').onsubmit = async function (e) {
+            e.preventDefault();
+            var t = inp.value.trim(); if (!t) return;
+            add(t, 'user'); inp.value = '';
+            try {
+                var h = {'Content-Type': 'application/json'};
+                h[document.getElementById('csrfHeader').value] = document.getElementById('csrfToken').value;
+                var r = await fetch('/chatbot/ask', {method: 'POST', headers: h, body: JSON.stringify({message: t})});
+                var j = await r.json(); add(j.reply, 'bot');
+            } catch (x) { add('Sorry, something went wrong.', 'bot'); }
+        };
+    })();
+    </script>
+</div>
+</body>
+</html>

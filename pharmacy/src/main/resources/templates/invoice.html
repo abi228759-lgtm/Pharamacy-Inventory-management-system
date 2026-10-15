@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<main class="container">
+    <div th:if="${success}" class="alert ok" th:text="${success}"></div>
+    <div th:if="${error}" class="alert bad" th:text="${error}"></div>
+    <div class="invoice panel">
+        <div class="inv-head">
+            <div><h1>+ Pharmacy</h1><small>Tax Invoice</small></div>
+            <div class="right"><strong th:text="${invoice.invoiceNumber}"></strong><br><span th:text="${invoice.createdAtDisplay}"></span></div>
+        </div>
+        <p><strong>Customer:</strong> <span th:text="${invoice.customerName}"></span>
+           <span th:if="${invoice.customerPhone != null and !invoice.customerPhone.isBlank()}" th:text="' | ' + ${invoice.customerPhone}"></span></p>
+        <table>
+            <thead><tr><th>#</th><th>Medicine</th><th>Qty</th><th>Unit price</th><th>Amount</th></tr></thead>
+            <tbody>
+            <tr th:each="it, st : ${invoice.items}">
+                <td th:text="${st.count}"></td><td th:text="${it.medicineName}"></td><td th:text="${it.quantity}"></td>
+                <td th:text="${it.unitPrice}"></td><td th:text="${it.lineTotal}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <table class="totals">
+            <tr><td>Subtotal</td><td th:text="${invoice.subtotal}"></td></tr>
+            <tr><td th:text="'Discount (' + ${invoice.discountPercent} + '%)'"></td><td th:text="'- ' + ${invoice.discountAmount}"></td></tr>
+            <tr><td th:text="'GST (' + ${invoice.gstPercent} + '%)'"></td><td th:text="${invoice.gstAmount}"></td></tr>
+            <tr class="grand"><td>Grand total (Rs.)</td><td th:text="${invoice.grandTotal}"></td></tr>
+        </table>
+        <p class="thanks">Billed by <span th:text="${invoice.createdBy}"></span>. Thank you - get well soon!</p>
+        <p class="no-print"><button type="button" class="btn" onclick="window.print()">Print invoice</button>
+           <a th:href="@{/billing}" class="btn btn-light">Back to billing</a></p>
+    </div>
+</main>
+<div th:replace="~{fragments :: chatbot}"></div>
+</body>
+</html>

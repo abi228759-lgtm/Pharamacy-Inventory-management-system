@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicines - Pharmacy</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<main class="container">
+    <h1>Medicine Management</h1>
+
+    <div th:if="${success}" class="alert ok" th:text="${success}"></div>
+    <div th:if="${error}" class="alert bad" th:text="${error}"></div>
+
+    <section class="panel">
+        <h2 th:text="${medicine.id == null} ? 'Add medicine' : 'Edit medicine'">Add medicine</h2>
+        <form th:action="@{/medicines/save}" th:object="${medicine}" method="post" class="grid">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="field"><label>Name</label>
+                <input type="text" th:field="*{name}">
+                <small class="err" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></small></div>
+
+            <div class="field"><label>Category</label>
+                <input type="text" th:field="*{category}" placeholder="e.g. Antibiotic"></div>
+
+            <div class="field"><label>Batch number</label>
+                <input type="text" th:field="*{batchNumber}">
+                <small class="err" th:if="${#fields.hasErrors('batchNumber')}" th:errors="*{batchNumber}"></small></div>
+
+            <div class="field"><label>Quantity</label>
+                <input type="number" th:field="*{quantity}" min="0">
+                <small class="err" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></small></div>
+
+            <div class="field"><label>Reorder level</label>
+                <input type="number" th:field="*{reorderLevel}" min="0">
+                <small class="err" th:if="${#fields.hasErrors('reorderLevel')}" th:errors="*{reorderLevel}"></small></div>
+
+            <div class="field"><label>Expiry date</label>
+                <input type="date" th:field="*{expiryDate}">
+                <small class="err" th:if="${#fields.hasErrors('expiryDate')}" th:errors="*{expiryDate}"></small></div>
+
+            <div class="field"><label>Price (&#8377;)</label>
+                <input type="number" step="0.01" min="0" th:field="*{price}">
+                <small class="err" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></small></div>
+
+            <div class="field actions">
+                <button type="submit" class="btn">Save</button>
+                <a th:if="${medicine.id != null}" th:href="@{/medicines}" class="btn btn-light">Cancel</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Medicine list</h2>
+        <form th:action="@{/medicines}" method="get" class="searchbar">
+            <input type="text" name="q" th:value="${q}" placeholder="Search name, category or batch">
+            <select name="status">
+                <option value="">All status</option>
+                <option value="EXPIRED" th:selected="${status == 'EXPIRED'}">Expired</option>
+                <option value="EXPIRING" th:selected="${status == 'EXPIRING'}">Expiring soon (30 days)</option>
+                <option value="LOW" th:selected="${status == 'LOW'}">Low stock</option>
+            </select>
+            <button type="submit" class="btn">Search</button>
+            <a th:href="@{/medicines}" class="btn btn-light">Reset</a>
+            <a th:href="@{/medicines/export(q=${q},status=${status})}" class="btn btn-light">Export CSV</a>
+        </form>
+        <div class="table-wrap">
+        <table>
+            <thead>
+            <tr><th>ID</th><th>Name</th><th>Category</th><th>Batch</th><th>Qty</th><th>Expiry</th><th>Days left</th><th>Price</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="m : ${medicines}" th:classappend="${m.expired} ? 'row-expired' : (${m.expiringSoon} ? 'row-expiring' : (${m.lowStock} ? 'row-low' : ''))">
+                <td th:text="${m.id}"></td>
+                <td th:text="${m.name}"></td>
+                <td th:text="${m.category}"></td>
+                <td th:text="${m.batchNumber}"></td>
+                <td th:text="${m.quantity}"></td>
+                <td th:text="${m.expiryDate}"></td>
+                <td th:text="${m.daysToExpiry < 0} ? ('Expired ' + ${-m.daysToExpiry} + ' days ago') : (${m.daysToExpiry} + ' days')"></td>
+                <td th:text="${#numbers.formatDecimal(m.price, 1, 'COMMA', 2, 'POINT')}"></td>
+                <td>
+                    <span th:if="${m.expired}" class="badge danger">Expired</span>
+                    <span th:if="${m.expiringSoon}" class="badge expiring">Expiring soon</span>
+                    <span th:if="${m.lowStock and !m.expired}" class="badge warn">Low stock</span>
+                    <span th:if="${!m.expired and !m.expiringSoon and !m.lowStock}" class="badge ok">OK</span>
+                </td>
+                <td class="row-actions">
+                    <a th:href="@{/medicines/edit/{id}(id=${m.id})}" class="btn btn-sm btn-light">Edit</a>
+                    <form th:action="@{/medicines/delete/{id}(id=${m.id})}" method="post"
+                          onsubmit="return confirm('Delete this medicine?');">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(medicines)}"><td colspan="10" class="empty">No medicines yet.</td></tr>
+            </tbody>
+        </table>
+        </div>
+    </section>
+</main>
+<div th:replace="~{fragments :: chatbot}"></div>
+</body>
+</html>

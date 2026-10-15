@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<main class="container">
+    <div th:if="${success}" class="alert ok" th:text="${success}"></div>
+    <div th:if="${error}" class="alert bad" th:text="${error}"></div>
+    <h1>Billing</h1>
+    <section class="panel">
+        <h2>New bill</h2>
+        <form th:action="@{/billing/create}" method="post">
+            <div class="grid">
+                <div class="field"><label>Customer name</label><input type="text" name="customerName" placeholder="Walk-in customer"></div>
+                <div class="field"><label>Phone</label><input type="text" name="customerPhone"></div>
+                <div class="field"><label>Discount (%)</label><input type="number" name="discountPercent" min="0" max="100" step="0.5" value="0"></div>
+            </div>
+            <div class="table-wrap"><table>
+                <thead><tr><th>Medicine</th><th style="width:120px">Qty</th><th style="width:90px"></th></tr></thead>
+                <tbody id="rows">
+                <tr>
+                    <td><select name="medicineId" required>
+                        <option th:each="m : ${available}" th:value="${m.id}" th:text="${m.name} + ' (stock ' + ${m.quantity} + ', Rs. ' + ${m.price} + ')'"></option>
+                    </select></td>
+                    <td><input type="number" name="quantity" min="1" value="1" required></td>
+                    <td><button type="button" class="btn btn-sm btn-danger rm">Remove</button></td>
+                </tr>
+                </tbody>
+            </table></div>
+            <p class="actions-row">
+                <button type="button" id="addRow" class="btn btn-light">+ Add item</button>
+                <button type="submit" class="btn">Generate invoice</button>
+            </p>
+            <small>GST is added automatically (rate set by app.billing.gst-percent).</small>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Recent invoices</h2>
+        <div class="table-wrap"><table>
+            <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Total (Rs.)</th><th>By</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="i : ${invoices}">
+                <td th:text="${i.invoiceNumber}"></td>
+                <td th:text="${i.createdAtDisplay}"></td>
+                <td th:text="${i.customerName}"></td>
+                <td th:text="${i.grandTotal}"></td>
+                <td th:text="${i.createdBy}"></td>
+                <td><a th:href="@{/billing/{id}(id=${i.id})}" class="btn btn-sm btn-light">View / Print</a></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(invoices)}"><td colspan="6" class="empty">No invoices yet.</td></tr>
+            </tbody>
+        </table></div>
+    </section>
+    <script>
+        document.getElementById('addRow').onclick = function () {
+            var r = document.querySelector('#rows tr').cloneNode(true);
+            r.querySelector('input').value = 1;
+            document.getElementById('rows').appendChild(r);
+        };
+        document.getElementById('rows').addEventListener('click', function (e) {
+            if (e.target.classList.contains('rm') && document.querySelectorAll('#rows tr').length > 1) e.target.closest('tr').remove();
+        });
+    </script>
+</main>
+<div th:replace="~{fragments :: chatbot}"></div>
+</body>
+</html>
